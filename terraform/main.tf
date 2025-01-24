@@ -38,7 +38,7 @@ locals {
 
 # Crear Resource
 resource "ibm_resource_group" "group" {
-    name     = "demo_postgresql"
+    name     = "llm"
   }
 # Crear WorkSpace para PVS
 resource "ibm_pi_workspace" "powervs_service_instance" {
@@ -78,10 +78,10 @@ resource "ibm_pi_image" "power_image"  {
 resource "ibm_pi_instance" "test-instance" {
     pi_memory             = "256"
     pi_processors         = "12"
-    pi_instance_name      = "power-postgresql"
+    pi_instance_name      = "power-llm"
     pi_proc_type          = "shared"
     pi_image_id           = local.catalog_image[0].image_id
-    pi_key_pair_name      = "ricky-key"
+    pi_key_pair_name      = "ricky-key" #change name ssh-key
     pi_sys_type           = "e1080"
     pi_cloud_instance_id  = ibm_pi_workspace.powervs_service_instance.id
     pi_pin_policy         = "none"

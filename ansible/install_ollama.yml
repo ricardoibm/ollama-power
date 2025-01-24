@@ -1,0 +1,46 @@
+---
+- name: Configurar Docker y ejecutar Ollama en IBM Power con CentOS 9
+  hosts: all
+  become: yes  # Ejecuta los comandos como usuario root
+  tasks:
+    - name: Instalar el paquete dnf-plugins-core
+      ansible.builtin.yum:
+        name: dnf-plugins-core
+        state: present
+
+    - name: Agregar el repositorio de Docker
+      ansible.builtin.command:
+        cmd: dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+        creates: /etc/yum.repos.d/docker-ce.repo  # Evita repetir el comando si ya está configurado
+
+    - name: Instalar Docker y sus complementos
+      ansible.builtin.yum:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: present
+
+    - name: Habilitar y arrancar el servicio Docker
+      ansible.builtin.service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Ejecutar el contenedor Ollama
+      ansible.builtin.docker_container:
+        name: ollama
+        image: quay.io/mgiessing/ollama:v0.3.14
+        state: started
+        restart_policy: always
+        privileged: yes
+        volumes:
+          - ollama:/root/.ollama
+        ports:
+          - "11434:11434"
+
+    - name: Ejecutar comando dentro del contenedor Ollama
+      ansible.builtin.command:
+        cmd: docker exec -it ollama ollama run granite3-dense:2b

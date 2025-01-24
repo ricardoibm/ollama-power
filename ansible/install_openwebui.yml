@@ -1,0 +1,43 @@
+---
+- name: Ejecutar contenedor Open-WebUI y verificar servicio en puerto 443
+  hosts: all
+  become: yes  # Ejecuta los comandos como usuario root
+  tasks:
+    - name: Verificar si el contenedor Open-WebUI ya está en ejecución
+      ansible.builtin.command:
+        cmd: docker ps --filter "name=open-webui" --format "{{.Names}}"
+      register: running_containers
+      changed_when: false
+
+    - name: Detener y eliminar el contenedor Open-WebUI si existe
+      ansible.builtin.command:
+        cmd: docker rm -f open-webui
+      when: "'open-webui' in running_containers.stdout_lines"
+      ignore_errors: true
+
+    - name: Ejecutar el contenedor Open-WebUI
+      ansible.builtin.command:
+        cmd: >-
+          docker run -d -p 443:8080
+          -v open-webui:/app/backend/data
+          --name open-webui --restart always
+          quay.io/mgiessing/open-webui:v0.3.23
+
+    - name: Esperar unos segundos para que el servicio inicie
+      ansible.builtin.wait_for:
+        port: 443
+        delay: 5  # Tiempo de espera antes de verificar
+        timeout: 30  # Tiempo máximo para esperar que el puerto esté disponible
+        state: started
+      register: service_check
+
+    - name: Verificar si el servicio está corriendo en el puerto 443
+      ansible.builtin.debug:
+        msg: >-
+          El servicio está corriendo en el puerto 443
+        when: service_check.state == "started"
+
+    - name: Mostrar mensaje de error si el servicio no está disponible
+      ansible.builtin.fail:
+        msg: "El servicio en el puerto 443 no está disponible después del despliegue."
+      when: service_check.state != "started"
