@@ -32,7 +32,7 @@
     - name: Ejecutar el contenedor Ollama
       ansible.builtin.docker_container:
         name: ollama
-        image: quay.io/mgiessing/ollama:v0.3.14
+        image: quay.io/mgiessing/ollama:v0.5.7
         state: started
         restart_policy: always
         privileged: yes
