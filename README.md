@@ -8,7 +8,7 @@
 2.  **Local Configuration**:
     
     -   Install Ansible (v2.10 or later).
-    -   Configure the `inventory.ini` file with the IP and credentials of your IBM Power10 host.
+    -   Configure the `inventory.ini` file with the Public IP and credentials of your IBM Power10 host.
     -   Add your SSH key to the `inventory.ini` file:
         `[ibm_power]`
         `<VM_IP> ansible_user=<USER> ansible_ssh_private_key_file=<PATH_TO_PRIVATE_KEY>` 
@@ -23,24 +23,22 @@
 
 1.  **Clone the Project**:
     
-  
-    
     `git clone https://github.com/ricardoibm/ollama-power.git` 
     
-2.  **Create the Infrastructure**: Navigate to the `terraform` directory and execute the script:
+2.  **Create the Infrastructure**: Navigate to the `terraform` directory, create and configure file terraform.tfvars with variable "ibmcloud_key" and execute the script:
 
     `terraform init`
    ` terraform apply` 
     
-3.  **Run Playbooks**:
+3.  **Run Playbooks**: Navegate to the `ansible` directory and configure file ansible_hosts.ini
     
     -   **Install Docker and deploy Ollama**:
            
-        `ansible-playbook -i inventory.ini playbooks/install_docker_and_ollama.yml` 
+        `ansible-playbook -i ansible_hosts.ini install_ollama.yml` 
         
     -   **Deploy Open-WebUI and verify service**:
 
-        `ansible-playbook -i inventory.ini playbooks/run_open_webui_container_with_check.yml` 
+        `ansible-playbook -i ansible_hosts.ini install_openwebui.yml` 
         
 
 ----------
@@ -54,7 +52,7 @@
     -   Ensure these ports are open in the virtual machine’s firewall.
 -   **Required Modifications**:
     
-    -   If you change credentials, IP, or SSH key path, update the `inventory.ini` file.
+    -   If you change credentials, IP, or SSH key path, update the `ansible_hosts.ini` file.
     -   You can modify mapped ports, mounted volumes, or container parameters directly in the playbooks.
 -   **Wait Time**:
     
@@ -70,7 +68,7 @@
     -   Review the automatic restart parameter (`--restart always`) in the containers if this behavior is not desired.
 -   **Resource Consumption**:
     
-    -   Ensure the virtual machine has sufficient resources (CPU, RAM, storage) to run Docker and the containers.
+    -   Ensure the LPAR has sufficient resources (CPU, RAM, storage) to run Docker and the containers.
 
 ----------
 
