@@ -1,43 +1,43 @@
 ---
-- name: Ejecutar contenedor Open-WebUI y verificar servicio en puerto 443
+- name: Container Open-WebUI & port 443
   hosts: all
-  become: yes  # Ejecuta los comandos como usuario root
+  become: yes  
   tasks:
-    - name: Verificar si el contenedor Open-WebUI ya está en ejecución
+    - name: Open-WebUI running
       ansible.builtin.command:
         cmd: docker ps --filter "name=open-webui" --format "{{.Names}}"
       register: running_containers
       changed_when: false
 
-    - name: Detener y eliminar el contenedor Open-WebUI si existe
+    - name: Delete container
       ansible.builtin.command:
         cmd: docker rm -f open-webui
       when: "'open-webui' in running_containers.stdout_lines"
       ignore_errors: true
 
-    - name: Ejecutar el contenedor Open-WebUI
+    - name: run container Open-WebUI
       ansible.builtin.command:
         cmd: >-
           docker run -d -p 443:8080
           -v open-webui:/app/backend/data
           --name open-webui --restart always
-          quay.io/mgiessing/open-webui:v0.3.23
+          quay.io/mgiessing/open-webui:v0.5.7
 
-    - name: Esperar unos segundos para que el servicio inicie
+    - name: Waiting
       ansible.builtin.wait_for:
         port: 443
-        delay: 5  # Tiempo de espera antes de verificar
-        timeout: 30  # Tiempo máximo para esperar que el puerto esté disponible
+        delay: 5  
+        timeout: 30  
         state: started
       register: service_check
 
-    - name: Verificar si el servicio está corriendo en el puerto 443
+    - name: check port 443
       ansible.builtin.debug:
         msg: >-
-          El servicio está corriendo en el puerto 443
+          open port 443
         when: service_check.state == "started"
 
-    - name: Mostrar mensaje de error si el servicio no está disponible
+    - name: website not running
       ansible.builtin.fail:
-        msg: "El servicio en el puerto 443 no está disponible después del despliegue."
+        msg: "website not running."
       when: service_check.state != "started"
