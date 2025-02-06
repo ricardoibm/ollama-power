@@ -4,7 +4,7 @@
 1.  **Infrastructure**:
     
     -   The virtual machine must be provisioned using the included Terraform script.
-    -   Ensure the virtual machine is running CentOS 9 and has internet access.
+    -   Ensure the LPAR is running CentOS 9 Stream and has internet access in IBM Power10.
 2.  **Local Configuration**:
     
     -   Install Ansible (v2.10 or later).
